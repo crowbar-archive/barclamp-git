@@ -9,7 +9,8 @@ define :pfs_and_install_deps, :action => :create do
   package("python-setuptools")
   package("python-pip")
   if cnode[cbook][:use_gitbarclamp]
-    gitserver = search(:node, "roles:git").first
+    env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
+    gitserver = search(:node, "roles:git#{env_filter}").first
     git_url = "git@#{gitserver[:fqdn]}:#{cbook}/#{comp_name}.git"
   else
     git_url = cnode[cbook][:gitrepo]

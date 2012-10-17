@@ -40,6 +40,7 @@ locale_additions:
           git_refspec: refspec (branch, tag, commit, etc.)
           use_gitbarclamp: Use barclamp git for pull from source
           use_gitrepo: Use pull from source
+          git_instance: Git instance
           deps: Pull from source dependencies list sepatared by a semicolon
           use_pip_cache: Use cached pip packages
 

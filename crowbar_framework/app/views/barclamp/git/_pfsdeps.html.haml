@@ -14,6 +14,9 @@
   %label{ :for => :use_gitrepo }= t('.use_gitrepo')
   = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitrepo"].to_s), :onchange => "update_value('use_gitrepo', 'use_gitrepo', 'boolean')"
 %p
+  %label{ :for => :git_instance }= t('.git_instance')
+  = instance_selector("git", :git_instance, "git_instance", @proposal)
+%p
   %label{ :for => :deps }= t('.deps')
   %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
     = @proposal.raw_data['attributes'][@proposal.barclamp]["pfs_deps"].join('; ')
