@@ -9,10 +9,10 @@ attr_file = "#{ENV['CROWBAR_DIR']}/barclamps/git/chef/cookbooks/git/attributes/d
 
 Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |yml|
   data = YAML.load_file(yml)
-  next if data["git"].nil?
+  next if data["git_repo"].nil?
   bc_name = yml.split('barclamps/').last.split('/').first
   repo_data[bc_name] = []
-  data["git"].each do |repo|
+  data["git_repo"].each do |repo|
     repo_name, origin = repo.split(' ')
     branches = repo.split(' ').drop(2) || []
     repo_data[bc_name] << { repo_name => {"origin" => origin, "branches" => branches } }
