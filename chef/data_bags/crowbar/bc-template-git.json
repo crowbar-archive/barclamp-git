@@ -3,7 +3,7 @@
   "description": "provides a git installation",
   "attributes": {
     "git": {
-      "foo": "bar"
+      "update_origins": false
     }
   },
   "deployment": {
