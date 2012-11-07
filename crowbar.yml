@@ -40,7 +40,9 @@ locale_additions:
           git_refspec: refspec (branch, tag, commit, etc.)
           use_gitbarclamp: Use barclamp git for pull from source
           use_gitrepo: Use pull from source
+          git_instance: Git instance
           deps: Pull from source dependencies list sepatared by a semicolon
+          use_pip_cache: Use cached pip packages
 
 debs:
   pkgs:
@@ -50,8 +52,5 @@ debs:
   ubuntu-12.04:
     build_pkgs:
       - ruby
-    build_cmd: build.sh
-
-git_repos:
-  # this repo is for smoketests only
-  - http://github.com/MirantisDellCrowbar/barclamp-git.git git
+      - python-pip
+    build_cmd: build/build.sh

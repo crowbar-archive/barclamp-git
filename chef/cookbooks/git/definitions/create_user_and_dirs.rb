@@ -1,8 +1,10 @@
 define :create_user_and_dirs, :action => :enable do
 
-  user_name = params[:name]
+  user_name = params[:user_name] || params[:name]
+  comp_name = params[:comp_name] || params[:name]
+  dir_group = params[:dir_group] || "root"
   dirs = ["/var/lib", "/var/log", "/var/lock", "/etc"]
-  dirs.map! { |d| d += "/" + user_name }
+  dirs.map! { |d| d += "/" + comp_name }
   dirs.concat(params[:opt_dirs]) if params[:opt_dirs]
 
   user user_name do
@@ -16,7 +18,7 @@ define :create_user_and_dirs, :action => :enable do
   dirs.each do |d|
     directory d do
       owner user_name
-      group "root"
+      group dir_group
     end
   end
 end

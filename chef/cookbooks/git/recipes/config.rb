@@ -58,9 +58,10 @@ provisioner = search(:node, "roles:provisioner-server").first
 proxy_addr = provisioner[:fqdn]
 proxy_port = provisioner[:provisioner][:web_port]
 
-node[:repo_data].each do |bc, repos|
+node[:git][:repo_data].each do |bc, repos|
   repos.each do |repo|
-    repo.each do |repo_name, repo_url|
+    repo.each do |repo_name, val|
+      repo_url = val["origin"]
       file_url = "http://#{proxy_addr}:#{proxy_port}/files/git_repos/#{bc}/#{repo_name}.tar.bz2"
       file_path = "#{dst_dir}/#{bc}/#{repo_name}.tar.bz2"
       repo_dir = "#{home_dir}/#{bc}/#{repo_name}.git"
@@ -88,15 +89,19 @@ node[:repo_data].each do |bc, repos|
         cwd repo_dir
         user git_username
         only_if do
-          require 'ping'
-          if repo_url.include?('@')
-            repo_host = repo_url.split('@')[1].split(':').first
+          if node[:git][:update_origins]
+            require 'ping'
+            if repo_url.include?('@')
+              repo_host = repo_url.split('@')[1].split(':').first
+            else
+              repo_host = repo_url.split('/')[2]
+            end
+            begin
+              Ping.pingecho repo_host, 5
+            rescue Exception => msg
+              false
+            end
           else
-            repo_host = repo_url.split('/')[2]
-          end
-          begin
-            Ping.pingecho repo_host, 5
-          rescue Exception => msg
             false
           end
         end

@@ -12,7 +12,7 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "foo": { "type": "str", "required": true }
+            "update_origins": { "type": "bool", "required": true }
           }
         }
       }
