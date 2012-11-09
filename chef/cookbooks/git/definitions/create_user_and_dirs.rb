@@ -1,5 +1,14 @@
 define :create_user_and_dirs, :action => :enable do
 
+  # params:
+  #   user_name - what name user will have [default: name]
+  #   comp_name - a name of component to deploy (eg. glance) [default: name]
+  #   home_dir - home directory for user [default: /var/lib/#{comp_name}]
+  #   user_gid - existing group id for user [default: nil] 
+  #   dir_group - already existing directory group [default: root]
+  #   opt_dirs - a list of additional dirs to create [default: nil]
+  #   
+
   user_name = params[:user_name] || params[:name]
   comp_name = params[:comp_name] || params[:name]
   dir_group = params[:dir_group] || "root"
