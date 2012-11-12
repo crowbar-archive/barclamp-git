@@ -1,25 +1,26 @@
 define :pfs_and_install_deps, :action => :create do
 
   #params:
-  #  name: name of comptonent to install
-  #  path: a path where to clone git repo [default: /opt/#{comp_name} ]
-  #  cookbook: a name of cookbook to use for PFS [default: current cookbook ]
-  #  cnode: a node where PFS will take all PFS related attrs [default: current node ]
-  #  reference: git_refspec (branch,tag,commit hashsum) for checkouting the code
-  #    defaultly uses `git_refspec` from `cookbook`'s proposal which was applied to `cnode`
+  #  name: name of component to be installed in pull-from-source mode
+  #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
+  #  cookbook: name of cookbook to use for pull-from-source [default: current cookbook ]
+  #  cnode: node where all the pull-from-source attributes related to the current proposal are [default: current node ]
+  #  reference: git_refspec (branch/tag/commit id) for the code check out 
+  #    by default uses `git_refspec` from `cookbook`'s proposal which was applied to `cnode`
   #    actually used only to deploy keystone libs for glance/nova/horizon/cinder
-  #  without_setup: set it to true for skipping 'python setup.py develop' [default: nil]
+
+  #  without_setup: if evals to true the 'python setup.py develop' command is not executed when deploying the component [default: nil]
   #    
-  #  every PFS-ed component should contain some attrs:
-  #    use_gitrepo: enable PFS [boolean: true/false]
-  #    git_instance: instance of git proposal [str]
-  #    git_refspec: a kind of checkouting `reference` [str]
-  #    gitrepo: user defined (external) git repo remote origin
-  #    use_gitbarclamp: pull code from node where `git_instance` proposal applied if true, otherwize `gitrepo` be used
-  #    use_pip_cache: use pip-cache from git node for installing pypi pre-cached packages for tools/pip-requires
-  #    pfs_deps: a semicolon separated list of additional packages needed for PFS-ed component deployment
-  #      for pypi packages prefix 'pip://' should be specified with usual pip pkg syntax. eg 'pip://python-novaclient>=1.2<3'
-  #      no prefix for deb packages, but package version can be specified after == sign. eg. 'kvm', 'qemu==0.6.2' 
+  #  every pull-from-sourced component has additional proposal attributes:
+  #    use_gitrepo: enable pull-from-source deployment mode [boolean: true/false]
+  #    use_gitbarclamp: if true use barclamp-git deployed git repository as the origin
+  #    git_instance: an instance of barclamp-git proposal to use when when use_gitbarclamp=true [str]
+  #    gitrepo: custom git remote origin for the repo when use_gitbarclamp=false
+  #    git_refspec: branch/tag/commit id [str]
+  #    use_pip_cache: use pip package cache to install pypi pre-cached packages listed in component's tools/pip-requires
+  #    pfs_deps: semicolon separated list of additional packages required for pull-from-sourced component deployment
+  #      pypi packages should be specified with usual pip pkg syntax. eg 'pip://python-novaclient>=1.2<3'
+  #      regular packages can have a version specification,  eg. 'kvm', 'qemu==0.6.2' 
   #
   comp_name = params[:name]
   install_path = params[:path] || "/opt/#{comp_name}"
