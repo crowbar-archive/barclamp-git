@@ -75,6 +75,12 @@ define :pfs_and_install_deps, :action => :create do
     end
   end
   unless params[:without_setup]
+    # workaround for swift
+    execute "remove_https_from_pip_requires_for_#{comp_name}" do
+      cwd install_path
+      command "sed -i '/github/d' tools/pip-requires"
+      only_if { comp_name == "swift" }
+    end
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
       command "#{pip_cmd} -r tools/pip-requires"
