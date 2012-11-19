@@ -2,6 +2,13 @@
 require 'yaml'
 
 debug = true #if ENV['DEBUG']
+errs = []
+at_exit { p errs.join("\n") if errs.length > 0}
+
+def check_errors
+  exit 2 if errs && errs.length > 0 
+end
+
 
 repo_data = {}
 
@@ -33,15 +40,19 @@ repo_data.each do |bc_name, repos|
      tmp_cache_path = "#{pip_cache_path}/#{repo_name}"
      system "mkdir -p #{repos_path}"
      system "mkdir -p #{pip_cache_path}"
-     if File.exists? "#{repos_path}/#{repo_name}.tar.bz2"
+     base_name ="#{repos_path}/#{repo_name}"
+     if File.exists? "#{base_name}.tar.bz2"
        # it seems that pre-cloned repo is already existing
        p "updating repo #{repo_name} from #{origin}" if debug
        system "cd #{repos_path} && tar xf #{repo_name}.tar.bz2"
+       errs << "failed to expand #{repo_name}" unless ::File.exists? "#{base_name}.git"
        p "fetching origin #{origin}" if debug 
-       system "cd #{repos_path}/#{repo_name}.git && git fetch origin"
+       ret = system "cd #{base_name}.git && git fetch origin"
+       errs << "failed to fetch #{base_name}" unless ret
      else
        p "cloning #{origin} to #{repo_name}.git" if debug
-       system "git clone --mirror #{origin} #{repos_path}/#{repo_name}.git"
+       ret = system "git clone --mirror #{origin} #{repos_path}/#{repo_name}.git"
+       errs << "failed to clone #{base_name}" unless ret
      end
      if branches.empty?
        raw_data = `cd #{repos_path}/#{repo_name}.git && git for-each-ref --format='%(refname)' refs/heads`
@@ -49,19 +60,22 @@ repo_data.each do |bc_name, repos|
      end
      p "caching pip requires packages from branches #{branches.join(' ')}" if debug
      system "git clone #{repos_path}/#{repo_name}.git tmp"
+     errs << "failed to create working tree of #{base_name}" unless ret
      if File.exists? "tmp/tools/pip-requires"
        branches.each do |branch|
          system "cd tmp && git checkout origin/#{branch}"
          system "mkdir -p #{tmp_cache_path}"
          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
          system "sed -i '/github/d' tmp/tools/pip-requires" if repo_name == "swift"
-         system "pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
+         ret = system "pip2tgz #{pip_cache_path} -r tmp/tools/pip-requires"
+         errs << "failed download pips for #{base_name}" unless ret
          system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
          system "rm -fr #{tmp_cache_path}"
        end
      end
      system "rm -fr tmp"
-     system "dir2pi #{pip_cache_path}"
+     ret = system "dir2pi #{pip_cache_path}"
+     errs << "failed to package pip reqs" unless ret
      p "packing #{repo_name}.git to #{repo_name}.tar.bz2" if debug
      system "cd #{repos_path} && tar cjf #{repo_name}.tar.bz2 #{repo_name}.git/"
      p "cleaning #{repo_name}.git" if debug
@@ -69,5 +83,5 @@ repo_data.each do |bc_name, repos|
    end
   end
 end
-
+check_errors
 p "git repos staging is complete now" if debug
