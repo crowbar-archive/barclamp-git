@@ -54,8 +54,8 @@ repo_data.each do |bc_name, repos|
          system "cd tmp && git checkout origin/#{branch}"
          system "mkdir -p #{tmp_cache_path}"
          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
-         system "sed -i '/github/d' tmp/tools/pip-requires" if repo_name == "swift"
-         system "pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
+         system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
+         system "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
          system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
          system "rm -fr #{tmp_cache_path}"
        end
