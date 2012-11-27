@@ -37,6 +37,7 @@ repo_data.each do |bc_name, repos|
      branches = val["branches"]
      repos_path = "#{ENV['BC_CACHE']}/files/git_repos/#{bc_name}"
      pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
+     tmp_cache_path = "#{pip_cache_path}/#{repo_name}"
      system "mkdir -p #{repos_path}"
      system "mkdir -p #{pip_cache_path}"
      base_name ="#{repos_path}/#{repo_name}"
@@ -63,8 +64,13 @@ repo_data.each do |bc_name, repos|
      if File.exists? "tmp/tools/pip-requires"
        branches.each do |branch|
          system "cd tmp && git checkout origin/#{branch}"
-         ret = system "pip2tgz #{pip_cache_path} -r tmp/tools/pip-requires"
+         system "mkdir -p #{tmp_cache_path}"
+         #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
+         system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
+         ret = system "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
          errs << "failed download pips for #{base_name}" unless ret
+         system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
+         system "rm -fr #{tmp_cache_path}"
        end
      end
      system "rm -fr tmp"

@@ -1,5 +1,27 @@
 define :pfs_and_install_deps, :action => :create do
 
+  #params:
+  #  name: name of component to be installed in pull-from-source mode
+  #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
+  #  cookbook: name of cookbook to use for pull-from-source [default: current cookbook ]
+  #  cnode: node where all the pull-from-source attributes related to the current proposal are [default: current node ]
+  #  reference: git_refspec (branch/tag/commit id) for the code check out 
+  #    by default uses `git_refspec` from `cookbook`'s proposal which was applied to `cnode`
+  #    actually used only to deploy keystone libs for glance/nova/horizon/cinder
+
+  #  without_setup: if evals to true the 'python setup.py develop' command is not executed when deploying the component [default: nil]
+  #    
+  #  every pull-from-sourced component has additional proposal attributes:
+  #    use_gitrepo: enable pull-from-source deployment mode [boolean: true/false]
+  #    use_gitbarclamp: if true use barclamp-git deployed git repository as the origin
+  #    git_instance: an instance of barclamp-git proposal to use when when use_gitbarclamp=true [str]
+  #    gitrepo: custom git remote origin for the repo when use_gitbarclamp=false
+  #    git_refspec: branch/tag/commit id [str]
+  #    use_pip_cache: use pip package cache to install pypi pre-cached packages listed in component's tools/pip-requires
+  #    pfs_deps: semicolon separated list of additional packages required for pull-from-sourced component deployment
+  #      pypi packages should be specified with usual pip pkg syntax. eg 'pip://python-novaclient>=1.2<3'
+  #      regular packages can have a version specification,  eg. 'kvm', 'qemu==0.6.2' 
+  #
   comp_name = params[:name]
   install_path = params[:path] || "/opt/#{comp_name}"
   cbook = params[:cookbook] || @cookbook_name
@@ -53,6 +75,12 @@ define :pfs_and_install_deps, :action => :create do
     end
   end
   unless params[:without_setup]
+    # workaround for swift
+    execute "remove_https_from_pip_requires_for_#{comp_name}" do
+      cwd install_path
+      command "sed -i '/github/d' tools/pip-requires"
+      only_if { comp_name == "swift" }
+    end
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
       command "#{pip_cmd} -r tools/pip-requires"
