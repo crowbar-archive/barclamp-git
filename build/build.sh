@@ -6,6 +6,6 @@ bc_needs_build() {
 }
 
 bc_build() {
-    pip install pip2pi
+    sudo pip install pip2pi
     $BC_DIR/build/build.rb
 }
