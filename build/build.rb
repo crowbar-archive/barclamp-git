@@ -64,6 +64,11 @@ repo_data.each do |bc_name, repos|
      if File.exists? "tmp/tools/pip-requires"
        branches.each do |branch|
          system "cd tmp && git checkout origin/#{branch}"
+         if $?.exitstatus != 0
+           # failed to checkout branch, checkouting tag instead
+           system "cd tmp && git checkout #{branch}"
+           errs << "failed to checkout #{branch}" if $?.exitstatus != 0
+         end         
          system "mkdir -p #{tmp_cache_path}"
          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
          system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
