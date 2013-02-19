@@ -5,7 +5,7 @@ debug = true #if ENV['DEBUG']
 errs = []
 at_exit { p errs.join("\n") if errs.length > 0}
 
-retr_count=5
+retr_count=20
 retr=0
 
 def check_errors
