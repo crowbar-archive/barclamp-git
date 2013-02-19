@@ -72,6 +72,8 @@ repo_data.each do |bc_name, repos|
          system "mkdir -p #{tmp_cache_path}"
          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
          system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
+         #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
+	 system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.5.1|g' tools/pip-requires"
          ret = system "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
          errs << "failed download pips for #{base_name}" unless ret
          system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
