@@ -5,8 +5,11 @@ debug = true #if ENV['DEBUG']
 errs = []
 at_exit { p errs.join("\n") if errs.length > 0}
 
+retr_count=5
+retr=0
+
 def check_errors
-  exit 2 if errs && errs.length > 0 
+  exit 2 if retr>=retr_count
 end
 
 
@@ -29,6 +32,7 @@ end
 p repo_data.inspect if debug
 # populate git cookbook attributes
 File.open(attr_file, 'w') {|f| f.write("default[:git][:repo_data] = #{repo_data.inspect}") }
+
 
 repo_data.each do |bc_name, repos|
   repos.each do |repo|
@@ -74,15 +78,19 @@ repo_data.each do |bc_name, repos|
          system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
          #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
          system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tmp/tools/pip-requires"
-         ret = system "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
-         errs << "failed download pips for #{base_name}" unless ret
+         while system("export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires")!=0 and retr<retr_count
+           retr += 1
+           errs << "failed download pips for #{base_name}"
+         end
          system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
          system "rm -fr #{tmp_cache_path}"
        end
      end
      system "rm -fr tmp"
-     ret = system "dir2pi #{pip_cache_path}"
-     errs << "failed to package pip reqs" unless ret
+     while system("dir2pi #{pip_cache_path}")!=0 and retr<retr_count
+       retr += 1
+       errs << "failed to package pip reqs" unless ret
+     end
      p "packing #{repo_name}.git to #{repo_name}.tar.bz2" if debug
      system "cd #{repos_path} && tar cjf #{repo_name}.tar.bz2 #{repo_name}.git/"
      p "cleaning #{repo_name}.git" if debug
