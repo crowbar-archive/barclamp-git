@@ -77,7 +77,8 @@ repo_data.each do |bc_name, repos|
          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
          system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tmp/tools/pip-requires" if repo_name == "swift"
          #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
-         system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tmp/tools/pip-requires"
+         #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tmp/tools/pip-requires"
+         #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
          while system("export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires")!=0 and retr<retr_count
            retr += 1
            errs << "failed download pips for #{base_name}"
