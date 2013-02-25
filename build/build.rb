@@ -90,7 +90,7 @@ repo_data.each do |bc_name, repos|
      system "rm -fr tmp"
      while system("dir2pi #{pip_cache_path}")!=0 and retr<retr_count
        retr += 1
-       errs << "failed to package pip reqs" unless ret
+       errs << "failed to package pip reqs"
      end
      p "packing #{repo_name}.git to #{repo_name}.tar.bz2" if debug
      system "cd #{repos_path} && tar cjf #{repo_name}.tar.bz2 #{repo_name}.git/"
