@@ -1,4 +1,4 @@
-define :pfs_and_install_deps, :action => :create, :virtualenv => "" do
+define :pfs_and_install_deps, :action => :create, :venv => "" do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
@@ -26,10 +26,12 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => "" do
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec] 
-  virtualenv_bin = params[:virtualenv].empty? "" : params[:virtualenv]+"/bin/"
-  unless params[:virtualenv].empty?
+  virtualenv_bin = params[:venv].empty? ? "" : params[:venv]+"/bin/"
+  unless params[:venv].empty?
     package("python-virtualenv")
-    Chef::Log.fail "Virtualenv '#{params[:virtualenv]}' not created" unless FileTest.directory?(virtualenv)
+    puts ">>>> Virtualenv: #{virtualenv_bin}"
+    puts ">>>> Params: #{params[:venv]}"
+    Chef::Log.fail "Virtualenv '#{params[:venv]}' not created" unless FileTest.directory?(virtualenv_bin)
   end
   package("git")
   package("python-setuptools")
