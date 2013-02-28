@@ -26,4 +26,4 @@ respawn
 <% cmd = @bin_name -%>
 <% cmd = "#{@opt_path}/#{@bin_name}" if @opt_path -%>
 <% cmd += " #{params}" if params -%>
-exec su -s /bin/sh -c "exec <%= cmd %>" <%= @user %>
+exec su -s /bin/sh -c "<%= "#{@prefix}#{cmd}" %>" <%= @user %>

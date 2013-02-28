@@ -36,6 +36,7 @@ locale_additions:
         edit_deployment:
           deployment: Deployment
         pfsdeps:
+          use_virtualenv: Use virtualenv
           gitrepo: Git repo url
           git_refspec: refspec (branch, tag, commit, etc.)
           use_gitbarclamp: Use barclamp git for pull from source
@@ -49,8 +50,11 @@ debs:
     - git
     - python-setuptools
     - python-pip
+    - python-virtualenv
+    - python-dev
   ubuntu-12.04:
     build_pkgs:
       - ruby
       - python-pip
     build_cmd: build/build.sh
+

@@ -1,0 +1,4 @@
+#!/bin/sh
+. <%= File.join @virtualenv,"bin/activate" %>
+<%= @bin %> $@
+deactivate
