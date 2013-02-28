@@ -1,5 +1,4 @@
-define :pfs_and_install_deps, :action => :create do
-
+define :pfs_and_install_deps, :action => :create, :virtualenv => "" do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
@@ -27,6 +26,11 @@ define :pfs_and_install_deps, :action => :create do
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec] 
+  virtualenv_bin = params[:virtualenv].empty? "" : params[:virtualenv]+"/bin/"
+  unless params[:virtualenv].empty?
+    package("python-virtualenv")
+    Chef::Log.fail "Virtualenv '#{params[:virtualenv]}' not created" unless FileTest.directory?(virtualenv)
+  end
   package("git")
   package("python-setuptools")
   package("python-pip")
@@ -69,7 +73,7 @@ define :pfs_and_install_deps, :action => :create do
       end
       (pip_deps - pip_pythonclients).each do |pkg| 
         execute "pip_install_#{pkg}" do
-          command "#{pip_cmd} '#{pkg}'"
+          command "#{virtualenv_bin}#{pip_cmd} '#{pkg}'"
         end
       end
     end
@@ -83,17 +87,17 @@ define :pfs_and_install_deps, :action => :create do
     end
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
-      command "#{pip_cmd} -r tools/pip-requires"
+      command "#{virtualenv_bin}#{pip_cmd} -r tools/pip-requires"
     end
     execute "setup_#{comp_name}" do
       cwd install_path
-      command "python setup.py develop"
+      command "#{virtualenv_bin}python setup.py develop"
       creates "#{install_path}/#{comp_name == "nova_dashboard" ? "horizon":comp_name}.egg-info"
     end
     # post install clients
     pip_pythonclients.each do |pkg| 
       execute "pip_install_clients_#{pkg}_for_#{comp_name}" do
-        command "#{pip_cmd} '#{pkg}'"
+        command "#{virtualenv_bin}#{pip_cmd} '#{pkg}'"
       end
     end
   end
