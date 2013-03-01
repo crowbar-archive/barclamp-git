@@ -3,15 +3,15 @@ require 'find'
 define :virtualenv, :action => :create, :where => nil, :owner => "root", :group => "root", :mode => 0755, :wrapped => [], :packages => {} do
   virtualenv_path = params[:where]
   if params[:action] == :create
-    # Create VirtualEnv
     package("python-pip")
     package("python-virtualenv")
-    puts "LOL"
+    package("python-dev")
     directory virtualenv_path do
       recursive true
       owner params[:owner]
       group params[:group]
       mode params[:mode]
+      action :create
     end
     execute "create virtualenv #{virtualenv_path}" do
       command "virtualenv #{virtualenv_path} --system-site-packages"

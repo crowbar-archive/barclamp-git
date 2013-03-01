@@ -26,12 +26,10 @@ define :pfs_and_install_deps, :action => :create, :venv => "" do
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec] 
-  virtualenv_bin = params[:venv].empty? ? "" : params[:venv]+"/bin/"
-  unless params[:venv].empty?
+  virtualenv_bin = (params[:venv] || "").empty? ? "" : params[:venv]+"/bin/"
+  unless virtualenv_bin.empty?
     package("python-virtualenv")
-    puts ">>>> Virtualenv: #{virtualenv_bin}"
-    puts ">>>> Params: #{params[:venv]}"
-    Chef::Log.fail "Virtualenv '#{params[:venv]}' not created" unless FileTest.directory?(virtualenv_bin)
+    Chef::Log.fail "Virtualenv '#{params[:venv]}' not created" unless FileTest.directory?(params[:venv])
   end
   package("git")
   package("python-setuptools")

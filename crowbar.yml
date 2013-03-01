@@ -51,6 +51,7 @@ debs:
     - python-setuptools
     - python-pip
     - python-virtualenv
+    - python-dev
   ubuntu-12.04:
     build_pkgs:
       - ruby
