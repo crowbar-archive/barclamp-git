@@ -1,4 +1,6 @@
-define :pfs_and_install_deps, :action => :create, :venv => "" do
+require 'find'
+
+define :pfs_and_install_deps, :action => :create do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
@@ -26,14 +28,33 @@ define :pfs_and_install_deps, :action => :create, :venv => "" do
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec] 
-  virtualenv_bin = (params[:venv] || "").empty? ? "" : params[:venv]+"/bin/"
-  unless virtualenv_bin.empty?
-    package("python-virtualenv")
-    Chef::Log.fail "Virtualenv '#{params[:venv]}' not created" unless FileTest.directory?(params[:venv])
-  end
+
   package("git")
   package("python-setuptools")
   package("python-pip")
+  
+  params[:venv] ||= ""
+
+  prefix = ""
+
+  # creatinv virtualenv if params[:venv] present
+  unless params[:venv].empty?
+    package("python-virtualenv")
+    package("python-dev")
+    prefix = params[:venv] + "/bin/"
+    directory params[:venv] do
+      recursive true
+      owner "root"
+      group "root"
+      mode  0775
+      action :create
+    end
+    execute "create virtualenv" do    
+      command "virtualenv #{params[:venv]} --system-site-packages"
+      not_if "test -e #{params[:venv]}/bin/python"
+    end
+  end
+
   if cnode[cbook][:use_gitbarclamp]
     env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
     gitserver = search(:node, "roles:git#{env_filter}").first
@@ -41,13 +62,14 @@ define :pfs_and_install_deps, :action => :create, :venv => "" do
   else
     git_url = cnode[cbook][:gitrepo]
   end
+
   if cnode[cbook][:use_pip_cache]
     provisioner = search(:node, "roles:provisioner-server").first
     proxy_addr = provisioner[:fqdn]
     proxy_port = provisioner[:provisioner][:web_port]
-    pip_cmd = "pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
+    pip_cmd = "#{prefix}pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
   else
-    pip_cmd = "pip install"
+    pip_cmd = "#{prefix}pip install"
   end
   git install_path do
     repository git_url 
@@ -73,7 +95,7 @@ define :pfs_and_install_deps, :action => :create, :venv => "" do
       end
       (pip_deps - pip_pythonclients).each do |pkg| 
         execute "pip_install_#{pkg}" do
-          command "#{virtualenv_bin}#{pip_cmd} '#{pkg}'"
+          command "#{pip_cmd} '#{pkg}'"
         end
       end
     end
@@ -87,18 +109,43 @@ define :pfs_and_install_deps, :action => :create, :venv => "" do
     end
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
-      command "#{virtualenv_bin}#{pip_cmd} -r tools/pip-requires"
+      command "#{pip_cmd} -r tools/pip-requires"
     end
     execute "setup_#{comp_name}" do
       cwd install_path
-      command "#{virtualenv_bin}python setup.py develop"
+      command "#{prefix}python setup.py develop"
       creates "#{install_path}/#{comp_name == "nova_dashboard" ? "horizon":comp_name}.egg-info"
     end
     # post install clients
     pip_pythonclients.each do |pkg| 
       execute "pip_install_clients_#{pkg}_for_#{comp_name}" do
-        command "#{virtualenv_bin}#{pip_cmd} '#{pkg}'"
+        command "#{pip_cmd} '#{pkg}'"
       end
     end
   end
+
+  # creatinv virtualenv if params[:venv] present
+  unless params[:venv].empty?
+    from = File.join(params[:venv],"bin")
+    to = "/usr/local/bin"
+    Find.find("#{install_path}/bin/") do |file|
+      next if FileTest.directory?(file)
+      bin_name = file.split("/").last
+      puts ">>>>  #{to}/#{bin_name} >> #{params[:venv]}/bin/#{bin_name}"
+      template "#{to}/#{bin_name}" do
+        cookbook "git"
+        source "virtualenv.erb"
+        mode 0755
+        owner "root"
+        group "root"
+        variables({
+          :venv => params[:venv],
+          :original_bin => "#{install_path}/bin/#{bin_name}",
+        })
+      end
+    end
+
+  end
+
 end
+

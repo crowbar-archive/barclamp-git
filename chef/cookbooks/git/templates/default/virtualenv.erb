@@ -1,4 +1,4 @@
 #!/bin/sh
-. <%= @env %>/activate
-<%= @from %> $@
+. <%= @venv %>/bin/activate
+<%= @original_bin %> $@
 deactivate
