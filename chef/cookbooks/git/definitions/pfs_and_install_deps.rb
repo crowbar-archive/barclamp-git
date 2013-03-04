@@ -128,8 +128,7 @@ define :pfs_and_install_deps, :action => :create do
   unless params[:venv].empty?
     from = File.join(params[:venv],"bin")
     to = "/usr/local/bin"
-    Find.find("#{install_path}/bin/") do |file|
-      next if FileTest.directory?(file)
+    Dir.glob('/opt/keystone/bin/*', File::FNM_NOESCAPE).each  do |file|
       bin_name = file.split("/").last
       puts ">>>>  #{to}/#{bin_name} >> #{params[:venv]}/bin/#{bin_name}"
       template "#{to}/#{bin_name}" do
