@@ -3,6 +3,8 @@ require 'find'
 define :pfs_and_install_deps, :action => :create do
   #params:
   #  name: name of component to be installed in pull-from-source mode
+  #  venv: path where will be created python virtualenv
+  #  venv_bins: binaries to wrapping form package to /usr/local/bin
   #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
   #  cookbook: name of cookbook to use for pull-from-source [default: current cookbook ]
   #  cnode: node where all the pull-from-source attributes related to the current proposal are [default: current node ]
@@ -34,6 +36,7 @@ define :pfs_and_install_deps, :action => :create do
   package("python-pip")
   
   params[:venv] ||= ""
+  params[:venv_bins] ||= []
 
   prefix = ""
 
@@ -125,12 +128,12 @@ define :pfs_and_install_deps, :action => :create do
   end
 
   # creatinv virtualenv if params[:venv] present
-  unless params[:venv].empty?
+  unless params[:venv].empty? and params[:venv_bins].empty?
     from = File.join(params[:venv],"bin")
     to = "/usr/local/bin"
-    Dir.glob('/opt/keystone/bin/*', File::FNM_NOESCAPE).each  do |file|
+    bins = params[:venv_bins].to_a.collect{|e| e.to_s}
+    bins.each  do |file|
       bin_name = file.split("/").last
-      puts ">>>>  #{to}/#{bin_name} >> #{params[:venv]}/bin/#{bin_name}"
       template "#{to}/#{bin_name}" do
         cookbook "git"
         source "virtualenv.erb"
