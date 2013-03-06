@@ -21,8 +21,8 @@
   %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
     = @proposal.raw_data['attributes'][@proposal.barclamp]["pfs_deps"].join('; ')
 %p
-  %label{ :for => :virtualenv }= t('.virtualenv')
-  %input#virtualenv{:type => "text", :name => "gitrepo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["virtualenv"], :onchange => "update_value('virtualenv','virtualenv', 'string')"}
+  %label{ :for => :use_virtualenv }= t('.use_virtualenv')
+  = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
 
 :javascript
 
