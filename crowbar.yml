@@ -36,7 +36,7 @@ locale_additions:
         edit_deployment:
           deployment: Deployment
         pfsdeps:
-          virtualenv: Virtualenv
+          use_virtualenv: Use virtualenv
           gitrepo: Git repo url
           git_refspec: refspec (branch, tag, commit, etc.)
           use_gitbarclamp: Use barclamp git for pull from source
