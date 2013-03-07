@@ -2,6 +2,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  virtualenv: install using virtualenv if true
+  #  wrap_bins ["<bin name>","<bin name>", ...]: create wrap for binaries
   #  path: path on the node's filesystem to clone git repo to [default: /opt/#{comp_name} ]
   #  cookbook: name of cookbook to use for pull-from-source [default: current cookbook ]
   #  cnode: node where all the pull-from-source attributes related to the current proposal are [default: current node ]
@@ -117,6 +118,17 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       execute "pip_install_clients_#{pkg}_for_#{comp_name}" do
         command "#{pip_cmd} '#{pkg}'"
       end
+    end
+  end
+
+  #wrap for bins
+  (params[:wrap_bins] || []).each do |bin|
+    template "/usr/local/bin/#{bin}" do
+      source "virtualenv.erb"
+      mode 0755
+      owner "root"
+      group "root"
+      variables({:virtualenv => "#{params[:virtualenv]}", :bin => File.join(params[:virtualenv],"bin",bin) })
     end
   end
 end
