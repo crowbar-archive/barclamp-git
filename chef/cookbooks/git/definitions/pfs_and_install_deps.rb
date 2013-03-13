@@ -124,6 +124,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   #wrap for bins
   (params[:wrap_bins] || []).each do |bin|
     template "/usr/local/bin/#{bin}" do
+      cookbook "git"
       source "virtualenv.erb"
       mode 0755
       owner "root"
