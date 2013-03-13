@@ -87,6 +87,8 @@ repo_data.each do |bc_name, repos|
           #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
           #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tmp/tools/pip-requires"
           #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
+          #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
+          system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tmp/tools/pip-requires"
           repeat_unless 10, "failed download pips for #{base_name}" do
             puts "export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires"
             system("export PIP_SRC=#{tmp_cache_path}/_pip2tgz_temp/build && pip2tgz #{tmp_cache_path} -r tmp/tools/pip-requires")
