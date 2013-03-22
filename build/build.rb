@@ -2,16 +2,8 @@
 require 'yaml'
 
 debug = true #if ENV['DEBUG']
-errs = []
-at_exit { p errs.join("\n") if errs.length > 0}
-
-retr_count=20
-retr=0
-
-def check_errors
-  exit 2 if retr>=retr_count
-end
-
+@errs = []
+at_exit { puts @errs.join("\n") if @errs.length > 0}
 
 repo_data = {}
 
@@ -29,10 +21,22 @@ Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |yml|
   end
 end
 
-p repo_data.inspect if debug
-# populate git cookbook attributes
+p repo_data if debug
+             # populate git cookbook attributes
 File.open(attr_file, 'w') {|f| f.write("default[:git][:repo_data] = #{repo_data.inspect}") }
 
+# method try repeat execute code and if can't done he generate exception
+def repeat_unless repeats, message = nil, &block
+  error = nil
+  repeats.times do
+    begin
+      raise (message || "execute a command failed") unless yield
+      break
+    rescue => error
+    end
+  end
+  @errs << error.to_s
+end
 
 repo_data.each do |bc_name, repos|
   repos.each do |repo|
@@ -101,5 +105,5 @@ repo_data.each do |bc_name, repos|
    end
   end
 end
-check_errors
-p "git repos staging is complete now" if debug
+exit 2 if @errs.any?
+puts "git repos staging is complete now" if debug
