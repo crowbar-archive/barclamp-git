@@ -70,6 +70,22 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
     proxy_addr = provisioner[:fqdn]
     proxy_port = provisioner[:provisioner][:web_port]
     pip_cmd = "#{prefix}pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
+  else
+    pip_cmd = "pip install"
+  end
+  # fix host key checking
+  cookbook_file "/root/.ssh/wrap-ssh4git.sh" do
+    cookbook "git"
+    source "wrap-ssh4git.sh"
+    owner "root"
+    mode 00700
+  end
+
+  git install_path do
+    repository git_url 
+    reference ref
+    action :sync
+    ssh_wrapper "/root/.ssh/wrap-ssh4git.sh"
   end
 
   if cnode[comp_name]
