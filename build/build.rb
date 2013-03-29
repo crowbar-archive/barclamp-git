@@ -101,6 +101,8 @@ repo_data.each do |bc_name, repos|
       repeat_unless 10, "failed to package pip reqs" do
         system("dir2pi #{pip_cache_path}")
       end
+      #we should wrap only relative path for pips in repo
+      system "sed -i 's|http://tarballs.openstack.org/oslo-config/oslo-config-2013.1b3.tar.gz#egg=oslo-config|oslo-config|g' tmp/tools/pip-requires"
       puts "packing #{repo_name}.git to #{repo_name}.tar.bz2" if debug
       system "cd #{repos_path} && tar cjf #{repo_name}.tar.bz2 #{repo_name}.git/"
       puts "cleaning #{repo_name}.git" if debug
