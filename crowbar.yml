@@ -46,14 +46,13 @@ locale_additions:
           use_pip_cache: Use cached pip packages
 
 debs:
-  pkgs:
+  build_pkgs:
     - git
     - python-setuptools
     - python-pip
     - python-virtualenv
     - python-dev
-  ubuntu-12.04:
-    build_pkgs:
-      - ruby
-      - python-pip
-    build_cmd: build/build.sh
+    - libxslt1.1
+    - libxslt1-dev
+
+build_cmd: build/build.sh
