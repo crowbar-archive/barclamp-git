@@ -2,7 +2,7 @@
 
 bc_needs_build() {
     # always update
-    return 0
+    [[ $USE_PFS = true ]]
 }
 
 bc_build() {
