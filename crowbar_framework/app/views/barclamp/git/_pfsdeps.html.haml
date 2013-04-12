@@ -1,31 +1,44 @@
-%p
-  %label{ :for => :gitrepo }= t('.gitrepo')
-  %input#gitrepo{:type => "text", :name => "gitrepo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["gitrepo"], :onchange => "update_value('gitrepo','gitrepo', 'string')"}
-%p
-  %label{ :for => :git_refspec }= t('.git_refspec')
-  %input#git_refspec{:type => "text", :name => "git_refspec", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["git_refspec"], :onchange => "update_value('git_refspec','git_refspec', 'string')"}
-%p
-  %label{ :for => :use_gitbarclamp }= t('.use_gitbarclamp')
-  = select_tag :use_gitbarclamp, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitbarclamp"].to_s), :onchange => "update_value('use_gitbarclamp', 'use_gitbarclamp', 'boolean')"
-%p
-  %label{ :for => :use_pip_cache }= t('.use_pip_cache')
-  = select_tag :use_pip_cache, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pip_cache"].to_s), :onchange => "update_value('use_pip_cache', 'use_pip_cache', 'boolean')"
+- use_git = @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitrepo"].to_s
+- git_style = (use_git == "true" ? 'display:block' : 'display:none')
 %p
   %label{ :for => :use_gitrepo }= t('.use_gitrepo')
-  = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitrepo"].to_s), :onchange => "update_value('use_gitrepo', 'use_gitrepo', 'boolean')"
-%p
-  %label{ :for => :git_instance }= t('.git_instance')
-  = instance_selector("git", :git_instance, "git_instance", @proposal)
-%p
-  %label{ :for => :deps }= t('.deps')
-  %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
-    = @proposal.raw_data['attributes'][@proposal.barclamp]["pfs_deps"].join('; ')
-%p
-  %label{ :for => :use_virtualenv }= t('.use_virtualenv')
-  = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
+  = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], use_git), :onchange => "pfs_toggle();"
+%div.container.pfs_div{:style=>git_style}
+  %p
+    %label{ :for => :gitrepo }= t('.gitrepo')
+    %input#gitrepo{:type => "text", :name => "gitrepo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["gitrepo"], :onchange => "update_value('gitrepo','gitrepo', 'string')"}
+  %p
+    %label{ :for => :git_refspec }= t('.git_refspec')
+    %input#git_refspec{:type => "text", :name => "git_refspec", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["git_refspec"], :onchange => "update_value('git_refspec','git_refspec', 'string')"}
+  %p
+    %label{ :for => :use_gitbarclamp }= t('.use_gitbarclamp')
+    = select_tag :use_gitbarclamp, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitbarclamp"].to_s), :onchange => "update_value('use_gitbarclamp', 'use_gitbarclamp', 'boolean')"
+  %p
+    %label{ :for => :use_pip_cache }= t('.use_pip_cache')
+    = select_tag :use_pip_cache, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pip_cache"].to_s), :onchange => "update_value('use_pip_cache', 'use_pip_cache', 'boolean')"
+  %p
+    %label{ :for => :git_instance }= t('.git_instance')
+    = instance_selector("git", :git_instance, "git_instance", @proposal)
+  %p
+    %label{ :for => :deps }= t('.deps')
+    %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
+      = @proposal.raw_data['attributes'][@proposal.barclamp]["pfs_deps"].join('; ')
+  %p
+    %label{ :for => :use_virtualenv }= t('.use_virtualenv')
+    = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
 
 :javascript
 
+  function pfs_toggle() {
+    var comp = document.getElementById('use_gitrepo').value;
+    if (comp=="true") {
+      $('div.pfs_div').show();
+    } else {
+      $('div.pfs_div').hide();
+    }
+    update_value('use_gitrepo', 'use_gitrepo', 'boolean');
+  }
+  
   function update_deps(){
     var proposal_input = $("input#proposal_attributes"); 
     var proposal_data = JSON.parse(proposal_input.val());
