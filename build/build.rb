@@ -45,7 +45,7 @@ Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |yml|
   FileUtils.mkdir_p(pip_cache_path)
   data["pips"].each do |pip_n|
     repeat_unless 2, "failed download pip #{pip_n}" do
-      system "pip2tgz tmp_cache_path \"#{pip_n}\""
+      system "pip2tgz \"#{tmp_cache_path}\" \"#{pip_n}\""
     end
   end
   system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
