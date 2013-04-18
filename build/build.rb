@@ -23,6 +23,7 @@ Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |yml|
   end
 end
 
+
 p repo_data if debug
 
 # Try n times to do something and then die if we cannot.
@@ -35,6 +36,22 @@ def repeat_unless repeats, message = nil, &block
 end
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
+tmp_cache_path = "#{pip_cache_path}/all_pips"
+#lets seek for pips in crowbar.yml
+Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |yml|
+  data = YAML.load_file(yml)
+  next if data["pips"].nil?
+  FileUtils.mkdir_p(tmp_cache_path)
+  FileUtils.mkdir_p(pip_cache_path)
+  data["pips"].each do |pip_n|
+    repeat_unless 2, "failed download pip #{pip_n}" do
+      system "pip2tgz \"#{tmp_cache_path}\" \"#{pip_n}\""
+    end
+  end
+  system "cp -a #{tmp_cache_path}/. #{pip_cache_path}"
+  system "rm -fr #{tmp_cache_path}"
+end
+
 
 repo_data.each do |bc_name, repos|
   repos.each do |repo|
