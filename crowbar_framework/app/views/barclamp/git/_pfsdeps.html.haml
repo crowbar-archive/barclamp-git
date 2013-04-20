@@ -23,9 +23,10 @@
     %label{ :for => :deps }= t('.deps')
     %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
       = @proposal.raw_data['attributes'][@proposal.barclamp]["pfs_deps"].join('; ')
-  %p
-    %label{ :for => :use_virtualenv }= t('.use_virtualenv')
-    = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
+  - unless @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].nil?
+    %p
+      %label{ :for => :use_virtualenv }= t('.use_virtualenv')
+      = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
 
 :javascript
 
@@ -38,9 +39,9 @@
     }
     update_value('use_gitrepo', 'use_gitrepo', 'boolean');
   }
-  
+
   function update_deps(){
-    var proposal_input = $("input#proposal_attributes"); 
+    var proposal_input = $("input#proposal_attributes");
     var proposal_data = JSON.parse(proposal_input.val());
     proposal_data['pfs_deps'] = $.map($("#pfs_deps").val().split(';'), $.trim);
     proposal_input.val(JSON.stringify(proposal_data));
