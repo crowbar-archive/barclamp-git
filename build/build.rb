@@ -92,7 +92,10 @@ begin
       puts ">>> Retry exec pip2tgz"
     end
   end
-  puts ">>> Success build cache for all barclamps"
+  if File.directory?(pip_cache_path)
+    raise "failed to package pip reqs" unless system("dir2pi #{pip_cache_path}")
+  end
+  puts ">>> Success build cache pips packages for all barclamps"
 rescue => e
   puts "!!! #{e.message}"
   exit(1)
