@@ -86,7 +86,7 @@ begin
   pip_requires.each do |pip|
     10.times do
       puts ">>> Try download pip: #{pip}"
-      if system("/usr/local/share/python/pip2tgz #{pip_cache_path} '#{pip}'")
+      if system("pip2tgz #{pip_cache_path} '#{pip}'")
         break
       end
       puts ">>> Retry exec pip2tgz"
