@@ -59,8 +59,6 @@ begin
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
           next unless File.exists? "tools/pip-requires"
 
-          #TODO(agordeev): remove that ugly workaround of pip failures on swift's folsom branch
-          system "sed -i '/^https/c\-e git+https://github.com/openstack/python-swiftclient#egg=python-swiftclient' tools/pip-requires" if repo_name == "swift"
           #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
           #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tools/pip-requires"
           #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
