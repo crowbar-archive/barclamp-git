@@ -24,7 +24,7 @@ begin
     unless crowbar["git_repo"].nil?
       crowbar["git_repo"].each do |repo|
         (name,url,branches) = repo.split(" ", 3)
-        barclamps[barclamp] << { name => {:origin => url, :brahcnes => branches.split(" ")} }
+        barclamps[barclamp] << { name => {:origin => url, :branches => branches.split(" ")} }
       end
     end
   end
@@ -33,7 +33,7 @@ begin
   barclamps.each do |barclamp, repos|
     repos = repos.collect{|i| i.first}
     repos.each do |repo_name,repo|
-      puts ">>> Collect pip requires from: #{repo_name} (#{repo[:brahcnes].empty? ? "?" : repo[:brahcnes].join(", ")})"
+      puts ">>> Collect pip requires from: #{repo_name} (#{repo[:branches].empty? ? "?" : repo[:branches].join(", ")})"
       # TODO: #"barclamps/#{barclamp}/git_repos")
       repos_path = "#{ENV['CACHE_DIR']}/barclamps/#{barclamp}/git_repos"
       base_name ="#{repos_path}/#{repo_name}"
@@ -43,8 +43,8 @@ begin
       raise "failed to expand #{file}" unless File.directory? "#{base_name}.git"
 
       FileUtils.cd("#{repos_path}/#{repo_name}.git") do
-        repo[:brahcnes] = %x(git for-each-ref --format='%(refname)' refs/heads).split("\n").map{ |x| x.split("refs/heads/").last}
-      end if repo[:brahcnes].empty?
+        repo[:branches] = %x(git for-each-ref --format='%(refname)' refs/heads).split("\n").map{ |x| x.split("refs/heads/").last}
+      end if repo[:branches].empty?
 
       FileUtils.cd(repos_path) do
         system("rm -rf #{repo_name}")
