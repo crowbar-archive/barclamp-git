@@ -53,7 +53,7 @@ begin
         end
       end
 
-      repo[:brahcnes].each do |branch|
+      repo[:branches].each do |branch|
         puts ">>> Branch: #{branch}"
         FileUtils.cd("#{repos_path}/#{repo_name}") do
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
