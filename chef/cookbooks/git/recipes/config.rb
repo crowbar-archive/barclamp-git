@@ -79,23 +79,26 @@ data_bag("barclamps").each do |bc|
         path file_path
         owner git_username
         action :create_if_missing
+        # If we cannot download the file we will just skip to the nest one.
+        ignore_failure true
       end
       directory "#{home_dir}/#{bc}" do
         owner git_username
         group git_username
-      end
+      end 
       execute "untar_#{repo_name}.tar.bz2" do
         cwd "#{home_dir}/#{bc}"
         user git_username
         command "tar xf #{file_path}"
-        creates repo_dir 
+        creates repo_dir
+        only_if do File.exists? file_path end
       end
       execute "git_fetch_#{repo_url}" do
         command "git fetch origin"
         cwd repo_dir
         user git_username
         only_if do
-          if node[:git][:update_origins]
+          if node[:git][:update_origins] && File.directory?(repo_dir)
             require 'ping'
             if repo_url.include?('@')
               repo_host = repo_url.split('@')[1].split(':').first
