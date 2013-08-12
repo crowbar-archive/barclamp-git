@@ -5,8 +5,7 @@ require 'fileutils'
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
 
 barclamps = {}
-
-pip_requires = ""
+pip_requires = []
 
 begin
   puts ">>> Starting build cache for barclamps"
@@ -18,7 +17,7 @@ begin
     barclamps[barclamp] ||= []
     # add pips from crowbar.yml
     unless crowbar["pips"].nil?
-      pip_requires += crowbar["pips"].join("\n")
+      pip_requires += crowbar["pips"].collect{|i| i.strip}
     end
     # add barclamp for pip caching
     unless crowbar["git_repo"].nil?
@@ -64,8 +63,7 @@ begin
           #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
           #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
           system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tools/pip-requires"
-
-          pip_requires += File.read("tools/pip-requires") + "\n"
+          pip_requires += File.read("tools/pip-requires").split("\n").collect{|pip| pip.strip}
         end
       end
       FileUtils.cd(repos_path) do
@@ -75,10 +73,11 @@ begin
     end
   end
 
-  pip_requires = pip_requires.split("\n").select{|i| not i.start_with?("#") and not i.strip.empty? }
+  pip_requires = pip_requires.select{|i| not i.strip.start_with?("#") and not i.strip.empty? }
   puts ">>> Total invoked packages: #{pip_requires.size}"
   pip_requires = pip_requires.uniq.sort
   puts ">>> Total unique packages: #{pip_requires.size}"
+  puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
   system("mkdir -p #{pip_cache_path}")
   pip_requires.each do |pip|
