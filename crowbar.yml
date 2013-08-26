@@ -59,6 +59,7 @@ rpms:
   pkgs:
     - git
     - python-setuptools
+    - python-virtualenv
     - python-pip
     - python-paver
     - python-devel
