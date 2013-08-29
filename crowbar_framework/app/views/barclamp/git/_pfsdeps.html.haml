@@ -18,7 +18,7 @@
     = select_tag :use_pip_cache, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pip_cache"].to_s), :onchange => "update_value('use_pip_cache', 'use_pip_cache', 'boolean')"
   %p
     %label{ :for => :git_instance }= t('.git_instance')
-    = instance_selector("git", :git_instance, "git_instance", @proposal)
+    = render_instance_selector("git", :git_instance, t('.git_instance'), "git_instance", @proposal)
   %p
     %label{ :for => :deps }= t('.deps')
     %textarea{ :id => "pfs_deps", :onchange => "update_deps()"}
