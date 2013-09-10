@@ -55,4 +55,15 @@ debs:
     - libxslt1.1
     - libxslt1-dev
 
+rpms:
+  pkgs:
+    - git
+    - python-setuptools
+    - python-virtualenv
+    - python-pip
+    - python-paver
+    - python-devel
+    - libxslt
+    - libxslt-devel
+
 build_cmd: build/build.sh
