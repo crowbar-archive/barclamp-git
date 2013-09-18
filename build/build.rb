@@ -40,30 +40,22 @@ begin
       raise "cannot find #{file}" unless File.exists? file
       FileUtils.cd(repos_path) do %x(tar xf "#{repo_name}.tar.bz2") end
       raise "failed to expand #{file}" unless File.directory? "#{base_name}.git"
-
       FileUtils.cd("#{repos_path}/#{repo_name}.git") do
         repo[:branches] = %x(git for-each-ref --format='%(refname)' refs/heads).split("\n").map{ |x| x.split("refs/heads/").last}
       end if repo[:branches].empty?
-
       FileUtils.cd(repos_path) do
         system("rm -rf #{repo_name}")
         unless system("git clone #{repo_name}.git #{repo_name}")
           raise "failed to clone repo #{repo_name}"
         end
       end
-
       repo[:branches].each do |branch|
         puts ">>> Branch: #{branch}"
         FileUtils.cd("#{repos_path}/#{repo_name}") do
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
-          next unless File.exists? "tools/pip-requires"
-
-          #glanceclient 0.7.0 now(19.02.2013) seems broken so lets fall back to 0.5.1
-          #system "sed -i 's|python-glanceclient.*$|python-glanceclient==0.6.0|g' tools/pip-requires"
-          #nor 0.5.1 or 0.6.0 seems suitable for tempest so leaving it to python-glanceclient or tempest maintainers cause this bug affect only tempest
-          #horizon seems broken with django 1.5, so lets try to freeze 1.4.5
-          system "sed -i 's|Django[<>=]*.*$|Django==1.4.5|g' tools/pip-requires"
-          pip_requires += File.read("tools/pip-requires").split("\n").collect{|pip| pip.strip}
+          require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
+          next unless require_file
+          pip_requires += File.read(require_file).split("\n").collect{|pip| pip.strip}
         end
       end
       FileUtils.cd(repos_path) do
@@ -81,10 +73,12 @@ begin
 
   system("mkdir -p #{pip_cache_path}")
   pip_requires.each do |pip|
-    10.times do
-      puts ">>> Try download pip: #{pip}"
-      if system("pip2tgz #{pip_cache_path} '#{pip}'")
-        break
+    10.times do |attempt|
+      puts ">>> Try download pip: #{pip} (attempt: #{attempt})"
+      success = system("pip2tgz #{pip_cache_path} '#{pip}'")
+      if not success and attempt >= 9
+        puts "!!! Can`t download pip '#{pip}'"
+        exit(1)
       end
       puts ">>> Retry exec pip2tgz"
     end
@@ -92,7 +86,7 @@ begin
   if File.directory?(pip_cache_path)
     raise "failed to package pip reqs" unless system("dir2pi #{pip_cache_path}")
   end
-  puts ">>> Success build cache pips packages for all barclamps"
+  puts ">>> Success build pips cache"
 rescue => e
   puts "!!! #{e.message}"
   exit(1)
