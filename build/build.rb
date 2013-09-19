@@ -56,11 +56,12 @@ begin
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
           require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
           next unless require_file
-          line = File.read(require_file).split("\n").collect{|pip| pip.strip}
-          if line.start_with?("-")
-            pip_options += line
-          elsif not line.start_with?("#")
-            pip_requires += line
+          File.read(require_file).split("\n").collect{|pip| pip.strip}.each do |line|
+            if line.start_with?("-")
+              pip_options += line
+            elsif not line.start_with?("#")
+              pip_requires += line
+            end
           end
         end
       end
