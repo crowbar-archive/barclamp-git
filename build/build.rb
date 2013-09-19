@@ -83,12 +83,15 @@ system("mkdir -p #{pip_cache_path}")
 pip_requires.each do |pip|
   10.times do |attempt|
     puts ">>> Try download pip: #{pip} (attempt: #{attempt+1})"
-    success = system("pip2tgz #{pip_cache_path} #{pip_options} '#{pip}'")
-    if not success and attempt >= 9
-      puts "!!! Can`t download pip '#{pip}'"
-      exit(1)
+    unless system("pip2tgz #{pip_cache_path} #{pip_options} '#{pip}'")
+      if attempt >= 9
+        exit(1)
+      else
+        puts ">>> Retry exec pip2tgz"
+      end
+    else
+      break
     end
-    puts ">>> Retry exec pip2tgz"
   end
 end
 if File.directory?(pip_cache_path)
