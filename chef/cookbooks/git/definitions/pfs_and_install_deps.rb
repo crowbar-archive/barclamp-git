@@ -123,6 +123,9 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       command "sed -i '/github/d' #{require_file}"
       only_if { comp_name == "swift" }
     end
+
+    pips = File.read(require_file).split("\n").collect{|pip| pip.strip}.select{|pip| not pip.start_with?("-") or not pip.start_with?("#")}
+
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
       command "#{pip_cmd} -r #{require_file}"

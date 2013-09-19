@@ -57,9 +57,9 @@ begin
           require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
           next unless require_file
           line = File.read(require_file).split("\n").collect{|pip| pip.strip}
-          if line.start_with("-")
+          if line.start_with?("-")
             pip_options += line
-          else
+          elsif not line.start_with?("#")
             pip_requires += line
           end
         end
