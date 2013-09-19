@@ -64,9 +64,6 @@ barclamps.each do |barclamp, repos|
         end
       end
     end
-
-
-
     FileUtils.cd(repos_path) do
       system("rm -rf #{repo_name}")
       system("rm -rf #{repo_name}.git")
@@ -74,20 +71,19 @@ barclamps.each do |barclamp, repos|
   end
 end
 
-
-
 pip_requires = pip_requires.select{|i| not i.strip.start_with?("#") and not i.strip.empty? }
 puts ">>> Total invoked packages: #{pip_requires.size}"
 pip_requires = pip_requires.uniq.sort
+pip_options = pip_options.uniq.join(" ")
 puts ">>> Total unique packages: #{pip_requires.size}"
-puts ">>> Pip options: #{pip_options.join(" ")}" if pip_options.any?
+puts ">>> Pip options: #{pip_options}" if pip_options.any?
 puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
 system("mkdir -p #{pip_cache_path}")
 pip_requires.each do |pip|
   10.times do |attempt|
     puts ">>> Try download pip: #{pip} (attempt: #{attempt+1})"
-    success = system("pip2tgz #{pip_options.join(" ")} #{pip_cache_path} '#{pip}'")
+    success = system("pip2tgz #{pip_options} #{pip_cache_path} '#{pip}'")
     if not success and attempt >= 9
       puts "!!! Can`t download pip '#{pip}'"
       exit(1)
