@@ -6,6 +6,7 @@ pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
 
 barclamps = {}
 pip_requires = []
+pip_options = []
 
 begin
   puts ">>> Starting build cache for barclamps"
@@ -55,9 +56,17 @@ begin
           raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
           require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
           next unless require_file
-          pip_requires += File.read(require_file).split("\n").collect{|pip| pip.strip}
+          line = File.read(require_file).split("\n").collect{|pip| pip.strip}
+          if line.start_with("-")
+            pip_options += line
+          else
+            pip_requires += line
+          end
         end
       end
+
+
+
       FileUtils.cd(repos_path) do
         system("rm -rf #{repo_name}")
         system("rm -rf #{repo_name}.git")
@@ -65,17 +74,20 @@ begin
     end
   end
 
+
+
   pip_requires = pip_requires.select{|i| not i.strip.start_with?("#") and not i.strip.empty? }
   puts ">>> Total invoked packages: #{pip_requires.size}"
   pip_requires = pip_requires.uniq.sort
   puts ">>> Total unique packages: #{pip_requires.size}"
+  puts ">>> Pip options: #{pip_options.join(" ")}" if pip_options.any?
   puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
   system("mkdir -p #{pip_cache_path}")
   pip_requires.each do |pip|
     10.times do |attempt|
-      puts ">>> Try download pip: #{pip} (attempt: #{attempt})"
-      success = system("pip2tgz #{pip_cache_path} '#{pip}'")
+      puts ">>> Try download pip: #{pip} (attempt: #{attempt+1})"
+      success = system("pip2tgz #{pip_options.join(" ")} #{pip_cache_path} '#{pip}'")
       if not success and attempt >= 9
         puts "!!! Can`t download pip '#{pip}'"
         exit(1)

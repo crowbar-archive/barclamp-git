@@ -115,15 +115,17 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   end
 
   unless params[:without_setup]
+    require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
+
     # workaround for swift
     execute "remove_https_from_pip_requires_for_#{comp_name}" do
       cwd install_path
-      command "sed -i '/github/d' tools/pip-requires"
+      command "sed -i '/github/d' #{require_file}"
       only_if { comp_name == "swift" }
     end
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
-      command "#{pip_cmd} -r tools/pip-requires"
+      command "#{pip_cmd} -r #{require_file}"
     end
     execute "setup_#{comp_name}" do
       cwd install_path
