@@ -44,8 +44,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   git install_path do
     repository git_url
     reference ref
-    action :sync
-  end
+  end.run_action(:sync)
 
   # prepare prefix to commands in using virtualenv
   prefix = params[:virtualenv] ? ". #{params[:virtualenv]}/bin/activate && " : nil
@@ -61,7 +60,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       mode  0775
       action :create
     end
-    execute "virtualenv #{params[:virtualenv]} --system-site-packages"
+    execute "virtualenv #{params[:virtualenv]}"
   end
 
   pip_cmd = "#{prefix}pip install"
@@ -72,20 +71,6 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
     pip_cmd = "#{prefix}pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
   else
     pip_cmd = "pip install"
-  end
-  # fix host key checking
-  cookbook_file "/root/.ssh/wrap-ssh4git.sh" do
-    cookbook "git"
-    source "wrap-ssh4git.sh"
-    owner "root"
-    mode 00700
-  end
-
-  git install_path do
-    repository git_url 
-    reference ref
-    action :sync
-    ssh_wrapper "/root/.ssh/wrap-ssh4git.sh"
   end
 
   if cnode[comp_name]
@@ -115,7 +100,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   end
 
   unless params[:without_setup]
-    require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
+    require_file = ["#{install_path}/tools/pip-requires","#{install_path}/requirements.txt"].select{|file| File.exist?(file)}.first
 
     # workaround for swift
     execute "remove_https_from_pip_requires_for_#{comp_name}" do
