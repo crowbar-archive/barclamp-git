@@ -54,5 +54,7 @@ debs:
     - python-dev
     - libxslt1.1
     - libxslt1-dev
-
+pips:
+  - distribute>=0.6.28
+  - setuptools-git
 build_cmd: build/build.sh
