@@ -52,7 +52,11 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   if params[:virtualenv] and not File.exist?(params[:virtualenv])
     # prefix not nil and .venv not exist try create virtualenv
     package("python-virtualenv")
-    package("python-dev")
+    if %w(redhat centos).include?(node.platform)
+      package("python-devel")
+    else
+      package("python-dev")
+    end
     directory params[:virtualenv] do
       recursive true
       owner "root"
