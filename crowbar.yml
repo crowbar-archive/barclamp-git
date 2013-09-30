@@ -57,7 +57,9 @@ debs:
 
 pips:
   - distribute>=0.6.28
+  - setuptools
   - setuptools-git
+  - MySQL-python
 
 rpms:
   pkgs:
