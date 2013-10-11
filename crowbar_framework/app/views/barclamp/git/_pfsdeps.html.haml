@@ -1,8 +1,10 @@
 - use_git = @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitrepo"].to_s
 - git_style = (use_git == "true" ? 'display:block' : 'display:none')
-%p
-  %label{ :for => :use_gitrepo }= t('.use_gitrepo')
-  = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], use_git), :onchange => "update_value('use_gitrepo','use_gitrepo', 'boolean')"
+%label.section-header{ :for => :cpfs_div }= t('.pull_from_source')
+%div.section{ :id => :pfs_div }
+  %p
+    %label{ :for => :use_gitrepo }= t('.use_gitrepo')
+    = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], use_git), :onchange => "update_value('use_gitrepo','use_gitrepo', 'boolean')"
 
 :javascript
 
