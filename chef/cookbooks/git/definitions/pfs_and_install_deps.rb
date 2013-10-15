@@ -1,4 +1,4 @@
-define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
+define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => nil do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  virtualenv: install using virtualenv if true
@@ -24,6 +24,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   #      regular packages can have a version specification,  eg. 'kvm', 'qemu==0.6.2' 
   #
   comp_name = params[:name]
+  repo_name = params[:repo] || params[:name]
   install_path = params[:path] || "/opt/#{comp_name}"
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
@@ -36,7 +37,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   if cnode[cbook][:use_gitbarclamp]
     env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
     gitserver = search(:node, "roles:git#{env_filter}").first
-    git_url = "git@#{gitserver[:fqdn]}:#{cbook}/#{comp_name}.git"
+    git_url = "git@#{gitserver[:fqdn]}:#{cbook}/#{repo_name}.git"
   else
     git_url = cnode[cbook][:gitrepo]
   end
