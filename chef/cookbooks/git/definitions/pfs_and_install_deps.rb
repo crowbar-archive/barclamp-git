@@ -1,4 +1,4 @@
-define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => nil do
+define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => nil, :system_site => false do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  virtualenv: install using virtualenv if true
@@ -65,7 +65,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => n
       mode  0775
       action :create
     end
-    execute "virtualenv #{params[:virtualenv]}"
+    execute "virtualenv #{params[:virtualenv]}#{" --system-site-packages" if params[:system_site] == true}"
   end
 
   pip_cmd = "#{prefix}pip install"
