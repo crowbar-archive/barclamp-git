@@ -56,6 +56,12 @@ debs:
     - libxslt1.1
     - libxslt1-dev
 
+pips:
+  - distribute>=0.6.28
+  - setuptools>=0.7
+  - setuptools-git
+  - MySQL-python
+
 rpms:
   pkgs:
     - git
