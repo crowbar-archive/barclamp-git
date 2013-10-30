@@ -28,6 +28,7 @@ define :create_user_and_dirs, :action => :enable, :user_name => nil, :group_name
   
   group group_name do
     members user_name
+    system true
   end
   
   dirs.each do |d|
