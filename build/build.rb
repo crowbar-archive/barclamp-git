@@ -1,12 +1,27 @@
 #!/usr/bin/env ruby
 require 'yaml'
 require 'fileutils'
+require 'rubygems'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
 
 barclamps = {}
 pip_requires = []
 pip_options = []
+
+def pip_downloaded?(pip, cache = "./")
+  name, requires = pip.scan(/^([\w\.-]*)(.*)$/).flatten
+  requires = requires.split(",")
+  in_cache = false
+  FileUtils.cd(cache) do
+    packages = Dir.glob("#{name}*")
+    versions = packages.collect{|package| package.scan(/([0-9\.]+)\.tar\.gz/).flatten.first}
+    in_cache = versions.select do |version|
+      requires.select { |require| not Gem::Dependency.new(name,require).match?(name,version) }.empty?
+    end.any?
+  end
+  return in_cache
+end
 
 puts ">>> Starting build cache for barclamps"
 # Collect git_repo from all crowbar.yml
@@ -81,6 +96,10 @@ puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
 system("mkdir -p #{pip_cache_path}")
 pip_requires.each do |pip|
+  if pip_downloaded?(pip,pip_cache_path)
+    puts ">>> Already downloaded: #{pip}"
+    next
+  end
   10.times do |attempt|
     puts ">>> Try download pip: #{pip} (attempt: #{attempt+1})"
     unless system("pip2tgz #{pip_cache_path} #{pip_options} '#{pip}'")
