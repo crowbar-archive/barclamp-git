@@ -105,7 +105,7 @@ puts ">>> Total invoked packages: #{pip_requires.size}"
 pip_requires = pip_requires.uniq.sort
 pip_options = pip_options.uniq.join(" ")
 puts ">>> Total unique packages: #{pip_requires.size}"
-puts ">>> Pip options: #{pip_options}" if pip_options.any?
+puts ">>> Pip options: #{pip_options}" if pip_options!=""
 puts ">>> Pips to download: #{pip_requires.join(", ")}"
 
 system("mkdir -p #{pip_cache_path}")
