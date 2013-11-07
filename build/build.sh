@@ -1,8 +1,8 @@
 #!/bin/bash
 
 bc_needs_build() {
-    # always update
-    [[ $USE_PFS = true ]]
+    # we always running build script to gather pips from crowbar.yml
+    true
 }
 
 bc_build() {

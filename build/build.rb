@@ -4,7 +4,11 @@ require 'fileutils'
 require 'rubygems'
 
 pip_cache_path = "#{ENV['BC_CACHE']}/files/pip_cache"
-
+if "#{ENV['USE_PFS']}" == "true"
+  use_gitrepos=true
+else
+  use_gitrepos=false
+end
 barclamps = {}
 pip_requires = []
 pip_options = []
@@ -30,6 +34,7 @@ end
 
 
 puts ">>> Starting build cache for barclamps"
+# we going to collect requirements from crowbar.yml in any case, if this is PFS build or not
 # Collect git_repo from all crowbar.yml
 Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |file|
   crowbar = YAML.load_file(file)
@@ -49,45 +54,48 @@ Dir.glob("#{ENV['CROWBAR_DIR']}/barclamps/*/crowbar.yml").each do |file|
   end
 end
 
-# Run on each repos and collect pips from tools/pip-requires
-barclamps.each do |barclamp, repos|
-  repos = repos.collect{|i| i.first}
-  repos.each do |repo_name,repo|
-    puts ">>> Collect pip requires from: #{repo_name} (#{repo[:branches].empty? ? "?" : repo[:branches].join(", ")})"
-    # TODO: #"barclamps/#{barclamp}/git_repos")
-    repos_path = "#{ENV['CACHE_DIR']}/barclamps/#{barclamp}/git_repos"
-    base_name ="#{repos_path}/#{repo_name}"
-    file = "#{base_name}.tar.bz2"
-    raise "cannot find #{file}" unless File.exists? file
-    FileUtils.cd(repos_path) do %x(tar xf "#{repo_name}.tar.bz2") end
-    raise "failed to expand #{file}" unless File.directory? "#{base_name}.git"
-    FileUtils.cd("#{repos_path}/#{repo_name}.git") do
-      repo[:branches] = %x(git for-each-ref --format='%(refname)' refs/heads).split("\n").map{ |x| x.split("refs/heads/").last}
-    end if repo[:branches].empty?
-    FileUtils.cd(repos_path) do
-      system("rm -rf #{repo_name}")
-      unless system("git clone #{repo_name}.git #{repo_name}")
-        raise "failed to clone repo #{repo_name}"
+if use_gitrepos
+  #we need this only in case if this is PFS build
+  # Run on each repos and collect pips from tools/pip-requires
+  barclamps.each do |barclamp, repos|
+    repos = repos.collect{|i| i.first}
+    repos.each do |repo_name,repo|
+      puts ">>> Collect pip requires from: #{repo_name} (#{repo[:branches].empty? ? "?" : repo[:branches].join(", ")})"
+      # TODO: #"barclamps/#{barclamp}/git_repos")
+      repos_path = "#{ENV['CACHE_DIR']}/barclamps/#{barclamp}/git_repos"
+      base_name ="#{repos_path}/#{repo_name}"
+      file = "#{base_name}.tar.bz2"
+      raise "cannot find #{file}" unless File.exists? file
+      FileUtils.cd(repos_path) do %x(tar xf "#{repo_name}.tar.bz2") end
+      raise "failed to expand #{file}" unless File.directory? "#{base_name}.git"
+      FileUtils.cd("#{repos_path}/#{repo_name}.git") do
+        repo[:branches] = %x(git for-each-ref --format='%(refname)' refs/heads).split("\n").map{ |x| x.split("refs/heads/").last}
+      end if repo[:branches].empty?
+      FileUtils.cd(repos_path) do
+        system("rm -rf #{repo_name}")
+        unless system("git clone #{repo_name}.git #{repo_name}")
+          raise "failed to clone repo #{repo_name}"
+        end
       end
-    end
-    repo[:branches].each do |branch|
-      puts ">>> Branch: #{branch}"
-      FileUtils.cd("#{repos_path}/#{repo_name}") do
-        raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
-        require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
-        next unless require_file
-        File.read(require_file).split("\n").collect{|pip| pip.strip}.each do |line|
-          if line.start_with?("-")
-            pip_options << line
-          elsif not line.start_with?("#")
-            pip_requires << line
+      repo[:branches].each do |branch|
+        puts ">>> Branch: #{branch}"
+        FileUtils.cd("#{repos_path}/#{repo_name}") do
+          raise "failed to checkout #{branch}" unless system "git checkout #{branch}"
+          require_file = ["tools/pip-requires","requirements.txt"].select{|file| File.exist? file}.first
+          next unless require_file
+          File.read(require_file).split("\n").collect{|pip| pip.strip}.each do |line|
+            if line.start_with?("-")
+              pip_options << line
+            elsif not line.start_with?("#")
+              pip_requires << line
+            end
           end
         end
       end
-    end
-    FileUtils.cd(repos_path) do
-      system("rm -rf #{repo_name}")
-      system("rm -rf #{repo_name}.git")
+      FileUtils.cd(repos_path) do
+        system("rm -rf #{repo_name}")
+        system("rm -rf #{repo_name}.git")
+      end
     end
   end
 end
