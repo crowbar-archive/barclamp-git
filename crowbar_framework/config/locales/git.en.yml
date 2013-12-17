@@ -2,9 +2,7 @@ en:
   barclamp:
     git:
       edit_attributes:
-        attributes: Attributes
-      edit_deployment:
-        deployment: Deployment
+        update_origins: Update origins
       pfsdeps:
         pull_from_source: Pull From Source
         use_virtualenv: Use virtualenv
