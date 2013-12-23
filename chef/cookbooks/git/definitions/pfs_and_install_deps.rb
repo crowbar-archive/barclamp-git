@@ -1,4 +1,4 @@
-define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
+define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => nil, :system_site => false do
   #params:
   #  name: name of component to be installed in pull-from-source mode
   #  virtualenv: install using virtualenv if true
@@ -24,19 +24,20 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   #      regular packages can have a version specification,  eg. 'kvm', 'qemu==0.6.2' 
   #
   comp_name = params[:name]
+  repo_name = params[:repo] || params[:name]
   install_path = params[:path] || "/opt/#{comp_name}"
   cbook = params[:cookbook] || @cookbook_name
   cnode = params[:cnode] || node
   ref = params[:reference] || cnode[cbook][:git_refspec]
 
-  package("git")
-  package("python-setuptools")
-  package("python-pip")
+  ["git","python-setuptools","python-pip","python-dev","libxslt1-dev"].each do |pkg|
+    package(pkg).run_action(:install)
+  end
 
   if cnode[cbook][:use_gitbarclamp]
     env_filter = " AND git_config_environment:git-config-#{cnode[cbook][:git_instance]}"
     gitserver = search(:node, "roles:git#{env_filter}").first
-    git_url = "git@#{gitserver[:fqdn]}:#{cbook}/#{comp_name}.git"
+    git_url = "git@#{gitserver[:fqdn]}:#{cbook}/#{repo_name}.git"
   else
     git_url = cnode[cbook][:gitrepo]
   end
@@ -44,8 +45,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   git install_path do
     repository git_url
     reference ref
-    action :sync
-  end
+  end.run_action(:sync)
 
   # prepare prefix to commands in using virtualenv
   prefix = params[:virtualenv] ? ". #{params[:virtualenv]}/bin/activate && " : nil
@@ -65,7 +65,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
       mode  0775
       action :create
     end
-    execute "virtualenv #{params[:virtualenv]} --system-site-packages"
+    execute "virtualenv #{params[:virtualenv]}#{" --system-site-packages" if params[:system_site] == true}"
   end
 
   pip_cmd = "#{prefix}pip install"
@@ -76,20 +76,6 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
     pip_cmd = "#{prefix}pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
   else
     pip_cmd = "pip install"
-  end
-  # fix host key checking
-  cookbook_file "/root/.ssh/wrap-ssh4git.sh" do
-    cookbook "git"
-    source "wrap-ssh4git.sh"
-    owner "root"
-    mode 00700
-  end
-
-  git install_path do
-    repository git_url 
-    reference ref
-    action :sync
-    ssh_wrapper "/root/.ssh/wrap-ssh4git.sh"
   end
 
   if cnode[comp_name]
@@ -104,6 +90,7 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
 
       pip_pythonclients = pip_deps.select{|x| x.include? "client"} || []
       apt_deps.each do |pkg|
+        next if pkg.strip.empty?
         pkg_version = pkg.split("==").last
         package pkg do
           version pkg_version if pkg_version != pkg
@@ -118,15 +105,20 @@ define :pfs_and_install_deps, :action => :create, :virtualenv => nil do
   end
 
   unless params[:without_setup]
+    require_file = ["#{install_path}/tools/pip-requires","#{install_path}/requirements.txt"].select{|file| File.exist?(file)}.first
+
     # workaround for swift
     execute "remove_https_from_pip_requires_for_#{comp_name}" do
       cwd install_path
-      command "sed -i '/github/d' tools/pip-requires"
+      command "sed -i '/github/d' #{require_file}"
       only_if { comp_name == "swift" }
     end
+
+    pips = File.read(require_file).split("\n").collect{|pip| pip.strip}.select{|pip| not pip.start_with?("-") or not pip.start_with?("#")}
+
     execute "pip_install_requirements_#{comp_name}" do
       cwd install_path
-      command "#{pip_cmd} -r tools/pip-requires"
+      command "#{pip_cmd} -r #{require_file}"
     end
     execute "setup_#{comp_name}" do
       cwd install_path
