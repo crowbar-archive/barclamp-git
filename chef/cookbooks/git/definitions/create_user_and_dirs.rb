@@ -23,6 +23,10 @@ define :create_user_and_dirs, :action => :enable do
     system true
     shell "/bin/false"
   end
+
+  group user_name do
+    members user_name
+  end
   
   dirs.each do |d|
     directory d do

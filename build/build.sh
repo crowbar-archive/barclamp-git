@@ -2,7 +2,7 @@
 
 bc_needs_build() {
     # always update
-    [[ $USE_PFS = true ]]
+    [[ $UPDATE_GIT_REPOS = true ]]
 }
 
 bc_build() {
