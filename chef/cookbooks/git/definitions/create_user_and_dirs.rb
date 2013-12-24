@@ -24,12 +24,11 @@ define :create_user_and_dirs, :action => :enable, :user_name => nil, :group_name
     system true
     shell "/bin/false"
   end
- 
+
   group group_name do
     members user_name
-    system true
   end
- 
+  
   dirs.each do |d|
     directory d do
       owner user_name

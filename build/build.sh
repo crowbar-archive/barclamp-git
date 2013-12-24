@@ -1,8 +1,8 @@
 #!/bin/bash
 
 bc_needs_build() {
-    # we always running build script to gather pips from crowbar.yml
-    true
+    # always update
+    [[ $UPDATE_GIT_REPOS = true ]]
 }
 
 bc_build() {
