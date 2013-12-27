@@ -1,17 +1,9 @@
-- use_git = @proposal.raw_data['attributes'][@proposal.barclamp]["use_gitrepo"].to_s
-- git_style = (use_git == "true" ? 'display:block' : 'display:none')
-%label.section-header{ :for => :cpfs_div }= t('.pull_from_source')
-%div.section{ :id => :pfs_div }
-  %p
-    %label{ :for => :use_gitrepo }= t('.use_gitrepo')
-    = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], use_git), :onchange => "update_value('use_gitrepo','use_gitrepo', 'boolean')"
+%fieldset
+  %legend
+    = t(".pull_from_source")
 
-:javascript
+  .form-group
+    %label{ :for => :use_gitrepo }
+      = t(".use_gitrepo")
 
-  function update_deps(){
-    var proposal_input = $("input#proposal_attributes");
-    var proposal_data = JSON.parse(proposal_input.val());
-    proposal_data['pfs_deps'] = $.map($("#pfs_deps").val().split(';'), $.trim);
-    proposal_input.val(JSON.stringify(proposal_data));
-  }
-
+    = select_tag :use_gitrepo, booleans_for_select(@proposal.pretty_attributes.use_gitrepo), :class => "form-control", "data-change" => "use_gitrepo;use_gitrepo;boolean"
