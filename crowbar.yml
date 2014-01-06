@@ -36,6 +36,8 @@ locale_additions:
         edit_deployment:
           deployment: Deployment
         pfsdeps:
+          pull_from_source: Pull From Source
+          use_virtualenv: Use virtualenv
           gitrepo: Git repo url
           git_refspec: refspec (branch, tag, commit, etc.)
           use_gitbarclamp: Use barclamp git for pull from source
@@ -45,12 +47,24 @@ locale_additions:
           use_pip_cache: Use cached pip packages
 
 debs:
-  pkgs:
+  build_pkgs:
     - git
     - python-setuptools
     - python-pip
-  ubuntu-12.04:
-    build_pkgs:
-      - ruby
-      - python-pip
-    build_cmd: build/build.sh
+    - python-virtualenv
+    - python-dev
+    - libxslt1.1
+    - libxslt1-dev
+
+rpms:
+  pkgs:
+    - git
+    - python-setuptools
+    - python-virtualenv
+    - python-pip
+    - python-paver
+    - python-devel
+    - libxslt
+    - libxslt-devel
+
+build_cmd: build/build.sh

@@ -2,10 +2,10 @@
 
 bc_needs_build() {
     # always update
-    return 0
+    [[ $USE_PFS = true ]]
 }
 
 bc_build() {
-    pip install pip2pi
+    sudo pip install pip2pi
     $BC_DIR/build/build.rb
 }

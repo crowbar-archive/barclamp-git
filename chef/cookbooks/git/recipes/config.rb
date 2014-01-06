@@ -58,11 +58,17 @@ provisioner = search(:node, "roles:provisioner-server").first
 proxy_addr = provisioner[:fqdn]
 proxy_port = provisioner[:provisioner][:web_port]
 
-node[:git][:repo_data].each do |bc, repos|
-  repos.each do |repo|
-    repo.each do |repo_name, val|
-      repo_url = val["origin"]
-      file_url = "http://#{proxy_addr}:#{proxy_port}/files/git_repos/#{bc}/#{repo_name}.tar.bz2"
+data_bag("barclamps").each do |bc|
+  data_bag_item("barclamps",bc).each do |k,v|
+    next unless k == "git_repo"
+    node[:git] ||= Mash.new
+    node[:git][:repo_data] ||= Mash.new
+    node[:git][:repo_data][bc] = Array.new
+    v.each do |repo|
+      repo_name, repo_url, branches = repo.split(' ',3)
+      branches = branches.split
+      node[:git][:repo_data][bc] << {repo_name => {"origin" => repo_url, "branches" => branches}}
+      file_url = "http://#{proxy_addr}:#{proxy_port}/git_repos/#{bc}/#{repo_name}.tar.bz2"
       file_path = "#{dst_dir}/#{bc}/#{repo_name}.tar.bz2"
       repo_dir = "#{home_dir}/#{bc}/#{repo_name}.git"
       directory "#{dst_dir}/#{bc}" do
@@ -73,23 +79,26 @@ node[:git][:repo_data].each do |bc, repos|
         path file_path
         owner git_username
         action :create_if_missing
+        # If we cannot download the file we will just skip to the nest one.
+        ignore_failure true
       end
       directory "#{home_dir}/#{bc}" do
         owner git_username
         group git_username
-      end
+      end 
       execute "untar_#{repo_name}.tar.bz2" do
-       cwd "#{home_dir}/#{bc}"
-       user git_username
-       command "tar xf #{file_path}"
-       creates repo_dir 
+        cwd "#{home_dir}/#{bc}"
+        user git_username
+        command "tar xf #{file_path}"
+        creates repo_dir
+        only_if do File.exists? file_path end
       end
       execute "git_fetch_#{repo_url}" do
         command "git fetch origin"
         cwd repo_dir
         user git_username
         only_if do
-          if node[:git][:update_origins]
+          if node[:git][:update_origins] && File.directory?(repo_dir)
             require 'ping'
             if repo_url.include?('@')
               repo_host = repo_url.split('@')[1].split(':').first
@@ -109,4 +118,4 @@ node[:git][:repo_data].each do |bc, repos|
     end
   end
 end
-
+node.save
