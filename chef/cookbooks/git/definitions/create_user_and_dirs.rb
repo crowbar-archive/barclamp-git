@@ -13,7 +13,7 @@ define :create_user_and_dirs, :action => :enable, :user_name => nil, :group_name
   group_name = params[:group_name] || params[:name]
   comp_name = params[:comp_name] || params[:name]
   dir_group = params[:dir_group] || "root"
-  dirs = ["/var/lib", "/var/log", "/var/lock", "/etc"]
+  dirs = ["/var/lib", "/var/log", "/var/lock", "/var/run", "/etc"]
   dirs.map! { |d| d += "/" + comp_name }
   dirs.concat(params[:opt_dirs]) if params[:opt_dirs]
 
