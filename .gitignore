@@ -1,1 +1,4 @@
-chef/cookbooks/git/attributes/default.rb
+.DS_Store
+*~
+
+.coverage/
