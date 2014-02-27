@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 define :link_service, :action => :create, :virtualenv => nil do
 
   service_name = params[:name]

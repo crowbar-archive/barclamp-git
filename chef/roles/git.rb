@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 name "git"
 description "Git Role - does git repos hosting via ssh"
 run_list(
