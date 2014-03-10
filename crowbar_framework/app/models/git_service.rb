@@ -23,14 +23,12 @@ class GitService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "git" => {
-            "unique" => false,
-            "count" => 1
-          }
+      {
+        "git" => {
+          "unique" => false,
+          "count" => 1
         }
-      end
+      }
     end
   end
 
