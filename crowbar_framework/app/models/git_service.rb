@@ -21,6 +21,17 @@ class GitService < ServiceObject
     @logger = thelogger
   end
 
+  class << self
+    def role_constraints
+      {
+        "git" => {
+          "unique" => false,
+          "count" => 1
+        }
+      }
+    end
+  end
+
   def create_proposal
     # TODO: ensure that only one proposal can be applied to a node
     @logger.debug("Git create_proposal: entering")

@@ -18,12 +18,4 @@
 #
 
 module GitBarclampHelper
-  def git_role_contraints
-    {
-      "git" => {
-        "unique" => false,
-        "count" => 1
-      }
-    }
-  end
 end
