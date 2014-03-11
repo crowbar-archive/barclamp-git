@@ -2,14 +2,13 @@ en:
   barclamp:
     git:
       edit_attributes:
-        update_origins: Update origins
+        update_origins: 'Update origins'
       pfsdeps:
-        pull_from_source: Pull From Source
-        use_virtualenv: Use virtualenv
-        gitrepo: Git repo url
-        git_refspec: refspec (branch, tag, commit, etc.)
-        use_gitbarclamp: Use barclamp git for pull from source
-        use_gitrepo: Use pull from source
-        git_instance: Git instance
-        deps: Pull from source dependencies list sepatared by a semicolon
-        use_pip_cache: Use cached pip packages
+        pull_from_source: 'Pull from source'
+        use_gitrepo: 'Pull from source'
+        gitrepo: 'Git repo URL'
+        git_refspec: 'Refspec'
+        git_refspec_hint: 'This can be any branch, tag or any specific commit hash'
+        use_gitbarclamp: 'Use git barclamp'
+        use_pip_cache: 'Use pip cache'
+        use_virtualenv: 'Use virtualenv'

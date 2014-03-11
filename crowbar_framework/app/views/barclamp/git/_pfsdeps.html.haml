@@ -6,4 +6,38 @@
     %label{ :for => :use_gitrepo }
       = t(".use_gitrepo")
 
-    = select_tag :use_gitrepo, booleans_for_select(@proposal.pretty_attributes.use_gitrepo), :class => "form-control", "data-change" => "use_gitrepo;use_gitrepo;boolean"
+    = select_tag :use_gitrepo, booleans_for_select(@proposal.pretty_attributes.use_gitrepo), :class => "form-control", "data-change" => "use_gitrepo;use_gitrepo;boolean", "data-showit" => "true", "data-showit-target" => "#git_container", "data-showit-direct" => "true"
+
+  #git_container
+    .form-group
+      %label{ :for => :gitrepo }
+        = t(".gitrepo")
+
+      = text_field_tag :gitrepo, @proposal.pretty_attributes.gitrepo, :class => "form-control", "data-change" => "gitrepo;gitrepo;string"
+
+    .form-group
+      %label{ :for => :git_refspec }
+        = t(".git_refspec")
+
+      = text_field_tag :git_refspec, @proposal.pretty_attributes.git_refspec, :class => "form-control", "data-change" => "git_refspec;git_refspec;string"
+    %span.help-block
+      = t(".git_refspec_hint")
+
+    .form-group
+      %label{ :for => :use_gitbarclamp }
+        = t(".use_gitbarclamp")
+
+      = select_tag :use_gitbarclamp, booleans_for_select(@proposal.pretty_attributes.use_gitbarclamp), :class => "form-control", "data-change" => "use_gitbarclamp;use_gitbarclamp;boolean"
+
+    .form-group
+      %label{ :for => :use_pip_cache }
+        = t(".use_pip_cache")
+
+      = select_tag :use_pip_cache, booleans_for_select(@proposal.pretty_attributes.use_pip_cache), :class => "form-control", "data-change" => "use_pip_cache;use_pip_cache;boolean"
+
+    - if @proposal.pretty_attributes.use_virtualenv?
+      .form-group
+        %label{ :for => :use_virtualenv }
+          = t(".use_virtualenv")
+
+        = select_tag :use_virtualenv, booleans_for_select(@proposal.pretty_attributes.use_virtualenv), :class => "form-control", "data-change" => "use_virtualenv;use_virtualenv;boolean"
