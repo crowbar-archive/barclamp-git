@@ -17,7 +17,10 @@
 #
 
 class GitController < BarclampController
-  def initialize
+
+  protected
+
+  def initialize_service
     @service_object = GitService.new logger
   end
 end
