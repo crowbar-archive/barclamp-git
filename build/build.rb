@@ -79,18 +79,16 @@ begin
   pip_cache_path = "#{ENV['CACHE_DIR']}/barclamps/git/files/pip_cache"
 
   system("mkdir -p #{pip_cache_path}")
+  current_pip = ""
   pip_requires.each do |pip|
-    10.times do
-      puts ">>> Try download pip: #{pip}"
-      if system("pip2pi #{pip_cache_path} #{pip_options} '#{pip}'")
-        break
-      end
-      puts ">>> Retry exec pip2tgz"
-    end
+     current_pip = pip
+     puts ">>> Try download pip: #{current_pip}"
+     system("pip install --quiet --download #{pip_cache_path} \"#{current_pip}\"")
   end
-  if File.directory?(pip_cache_path)
-    raise "failed to package pip reqs" unless system("find '#{pip_cache_path}' -type f -iname 'index.html' -exec rm {} \\;")
-  end
+
+  #build simple path
+  system("#{ENV['CROWBAR_DIR']}/pip-bundler.py -f -c #{pip_cache_path} \"#{current_pip}\"")
+
   puts ">>> Success build cache pips packages for all barclamps"
 rescue => e
   puts "!!! #{e.message}"
