@@ -1,4 +1,4 @@
-#!/bin/bash
+# -*- encoding : utf-8 -*-
 #
 # Copyright 2011-2013, Dell
 # Copyright 2013-2014, SUSE LINUX Products GmbH
@@ -16,16 +16,10 @@
 # limitations under the License.
 #
 
+module Crowbar
+  module Registry
+    class Git < Base
 
-
-
-
-bc_needs_build() {
-    # always update
-    [[ $UPDATE_GIT_REPOS = true ]]
-}
-
-bc_build() {
-    sudo pip install pip2pi
-    $BC_DIR/build/build.rb
-}
+    end
+  end
+end

@@ -16,11 +16,12 @@
 #
 
 barclamp:
-  name: git 
-  display: Git
+  name: 'git'
+  display: 'Git'
+  description: 'Git configuration for Git deployments'
   version: 0
   member:
-    - crowbar
+    - 'crowbar'
 
 crowbar:
   layout: 1
@@ -30,29 +31,29 @@ crowbar:
 
 debs:
   build_pkgs:
-    - git
-    - python-setuptools
-    - python-pip
-    - python-virtualenv
-    - python-dev
-    - libxslt1.1
-    - libxslt1-dev
-
-pips:
-  - distribute==0.6.28
-  - setuptools>=0.7
-  - setuptools-git
-  - MySQL-python
+    - 'git'
+    - 'python-setuptools'
+    - 'python-pip'
+    - 'python-virtualenv'
+    - 'python-dev'
+    - 'libxslt1.1'
+    - 'libxslt1-dev'
 
 rpms:
   pkgs:
-    - git
-    - python-setuptools
-    - python-virtualenv
-    - python-pip
-    - python-paver
-    - python-devel
-    - libxslt
-    - libxslt-devel
+    - 'git'
+    - 'python-setuptools'
+    - 'python-virtualenv'
+    - 'python-pip'
+    - 'python-paver'
+    - 'python-devel'
+    - 'libxslt'
+    - 'libxslt-devel'
 
-build_cmd: build/build.sh
+pips:
+  - 'distribute==0.6.28'
+  - 'setuptools>=0.7'
+  - 'setuptools-git'
+  - 'MySQL-python'
+
+build_cmd: 'build/build.sh'
