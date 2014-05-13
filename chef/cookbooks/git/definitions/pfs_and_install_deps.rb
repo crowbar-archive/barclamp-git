@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 define :pfs_and_install_deps, :action => :create, :virtualenv => nil, :repo => nil, :system_site => false do
   #params:
   #  name: name of component to be installed in pull-from-source mode

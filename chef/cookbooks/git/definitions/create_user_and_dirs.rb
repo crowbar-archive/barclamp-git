@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 define :create_user_and_dirs, :action => :enable, :user_name => nil, :group_name => nil do
   # params:
   #   user_name - name of the user to create  [default: name]
