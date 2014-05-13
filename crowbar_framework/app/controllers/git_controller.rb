@@ -23,4 +23,8 @@ class GitController < BarclampController
   def initialize_service
     @service_object = GitService.new logger
   end
+
+  def permitted_params
+    params.require(:git)
+  end
 end
