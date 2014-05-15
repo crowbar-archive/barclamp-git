@@ -83,7 +83,7 @@ begin
   pip_requires.each do |pip|
      current_pip = pip
      puts ">>> Try download pip: #{current_pip}"
-     system("pip install --quiet --download #{pip_cache_path} \"#{current_pip}\"")
+     system("pip install --quiet --download #{pip_cache_path} --no-use-wheel --no-compile \"#{current_pip}\"")
   end
 
   #build simple path
