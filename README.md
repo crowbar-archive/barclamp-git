@@ -1,4 +1,4 @@
-### **This barclamp (master) moved to [crowbar-openstack](https://github.com/crowbar/crowbar-openstack). This repo only accepts bugfixes for tex and older**.
+### **This barclamp has been dropped during the repo-merge. There will be no future development after tex**.
 
 Welcome to a Barclamp for the Crowbar Framework project
 =======================================================
