@@ -1,6 +1,0 @@
-#!/bin/sh
-. <%= File.join @virtualenv,"bin/activate" %>
-<%= @bin %> $@
-code=$?
-deactivate
-exit $code
